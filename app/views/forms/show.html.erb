@@ -1,0 +1,42 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @form %>
+
+<div>
+  <%= link_to "Edit this form", edit_form_path(@form) %> |
+  <%= link_to "Back to forms", forms_path %>
+
+  <%= button_to "Destroy this form", @form, method: :delete %>
+</div>
+
+<hr>
+
+<h2>Fields</h2>
+<p>
+  <%= link_to "Add field", new_field_path(form_id: @form.id) %>
+  |
+  <%= link_to "Fill this form", new_form_submission_path(@form) %>
+  |
+  <%= link_to "View submissions", form_submissions_path(@form) %>
+</p>
+
+<ul>
+  <% @form.fields.ordered.each do |field| %>
+    <li>
+      <strong><%= field.label %></strong> (<%= field.field_type %>)
+      - <%= link_to 'Edit', edit_field_path(field) %>
+      - <%= link_to 'Delete', field_path(field), data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' } %>
+      <% if field.select? %>
+        <div style="margin-left: 1rem;">
+          <em>Options:</em>
+          <ul>
+            <% field.options.order(Arel.sql('COALESCE(position, 999999), id')).each do |opt| %>
+              <li><%= opt.label %> (<%= opt.value %>) - <%= link_to 'Edit', edit_option_path(opt) %></li>
+            <% end %>
+          </ul>
+          <%= link_to 'Add option', new_option_path(field_id: field.id) %>
+        </div>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

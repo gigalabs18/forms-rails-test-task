@@ -1,0 +1,42 @@
+<%= form_with(model: field) do |form| %>
+  <% if field.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(field.errors.count, "error") %> prohibited this field from being saved:</h2>
+
+      <ul>
+        <% field.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :form_id, style: "display: block" %>
+    <% if params[:form_id].present? %>
+      <%= form.hidden_field :form_id, value: params[:form_id] %>
+      <em>Form: <%= Form.find(params[:form_id]).title %></em>
+    <% else %>
+      <%= form.collection_select :form_id, Form.order(:id), :id, :title, include_blank: true %>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.label :label, style: "display: block" %>
+    <%= form.text_field :label %>
+  </div>
+
+  <div>
+    <%= form.label :field_type, style: "display: block" %>
+    <%= form.select :field_type, options_for_select(Field::FIELD_TYPES.map { |t| [t.humanize, t] }, field.field_type), include_blank: false %>
+  </div>
+
+  <div>
+    <%= form.label :position, style: "display: block" %>
+    <%= form.number_field :position %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

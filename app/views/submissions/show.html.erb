@@ -1,0 +1,10 @@
+<h1>Submission #<%= @submission.id %> for <%= @form.title %></h1>
+
+<p><%= link_to 'All submissions', form_submissions_path(@form) %></p>
+
+<dl>
+  <% @responses.each do |r| %>
+    <dt><strong><%= r.field.label %></strong></dt>
+    <dd><%= r.value %></dd>
+  <% end %>
+</dl>

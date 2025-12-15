@@ -1,0 +1,25 @@
+<h1>Submissions for: <%= @form.title %></h1>
+
+<p>
+  <%= link_to 'Back to forms', forms_path %> |
+  <%= link_to 'Fill this form', new_form_submission_path(@form) %>
+  </p>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Submitted at</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @submissions.each do |s| %>
+      <tr>
+        <td><%= s.id %></td>
+        <td><%= s.created_at.strftime('%Y-%m-%d %H:%M') %></td>
+        <td><%= link_to 'View', form_submission_path(@form, s) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

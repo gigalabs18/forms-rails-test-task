@@ -1,0 +1,24 @@
+<h1>Fill Form: <%= @form.title %></h1>
+
+<%= form_with url: form_submissions_path(@form), method: :post do %>
+  <div class="fields">
+    <% @form.fields.ordered.each do |field| %>
+      <div class="field">
+        <%= label_tag "responses_#{field.id}", field.label %><br>
+        <% case field.field_type %>
+          <% when 'text' %>
+            <%= text_field_tag "responses[#{field.id}]", nil, class: 'input' %>
+          <% when 'number' %>
+            <%= number_field_tag "responses[#{field.id}]", nil, class: 'input' %>
+          <% when 'select' %>
+            <%= select_tag "responses[#{field.id}]", options_from_collection_for_select(field.options.order(Arel.sql('COALESCE(position, 999999), id')), 'value', 'label'), include_blank: true, class: 'input' %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="actions">
+    <%= submit_tag 'Submit' %>
+    <%= link_to 'Cancel', forms_path %>
+  </div>
+<% end %>

@@ -1,0 +1,42 @@
+<%= form_with(model: option) do |form| %>
+  <% if option.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(option.errors.count, "error") %> prohibited this option from being saved:</h2>
+
+      <ul>
+        <% option.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :field_id, style: "display: block" %>
+    <% if params[:field_id].present? %>
+      <%= form.hidden_field :field_id, value: params[:field_id] %>
+      <em>Field: <%= Field.find(params[:field_id]).label %></em>
+    <% else %>
+      <%= form.collection_select :field_id, Field.order(:id), :id, :label, include_blank: true %>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.label :label, style: "display: block" %>
+    <%= form.text_field :label %>
+  </div>
+
+  <div>
+    <%= form.label :value, style: "display: block" %>
+    <%= form.text_field :value %>
+  </div>
+
+  <div>
+    <%= form.label :position, style: "display: block" %>
+    <%= form.number_field :position %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>
