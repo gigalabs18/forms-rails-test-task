@@ -1,0 +1,29 @@
+<div class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl font-semibold">Users</h1>
+  <%= link_to "New user", new_admin_user_path, class: "btn btn-primary" %>
+</div>
+
+<div class="card">
+  <table class="table">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="th">ID</th>
+        <th class="th">Email</th>
+        <th class="th">Role</th>
+        <th class="th text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      <% @users.each do |u| %>
+        <tr>
+          <td class="td">#<%= u.id %></td>
+          <td class="td"><%= u.email %></td>
+          <td class="td"><%= u.role.humanize %></td>
+          <td class="td text-right">
+            <%= link_to "Edit", edit_admin_user_path(u), class: "btn btn-secondary" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

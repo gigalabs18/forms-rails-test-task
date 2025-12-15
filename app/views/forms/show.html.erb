@@ -1,42 +1,102 @@
-<p style="color: green"><%= notice %></p>
 
-<%= render @form %>
-
-<div>
-  <%= link_to "Edit this form", edit_form_path(@form) %> |
-  <%= link_to "Back to forms", forms_path %>
-
-  <%= button_to "Destroy this form", @form, method: :delete %>
+<div class="mb-4">
+  <div class="flex items-center gap-3">
+    <h1 class="text-2xl font-semibold flex-1"><%= @form.title %></h1>
+    <div class="flex items-center gap-2">
+      <%= link_to "Back", forms_path, class: "btn btn-ghost" %>
+      <% if current_user&.super_admin? || @form.user_id == current_user&.id %>
+        <%= link_to "Edit", edit_form_path(@form), class: "btn btn-secondary" %>
+        <%= button_to "Delete", @form, method: :delete, form: { data: { turbo_confirm: 'Are you sure?' } }, class: "btn btn-danger" %>
+      <% end %>
+    </div>
+  </div>
 </div>
 
-<hr>
+<p class="mb-4 text-sm text-slate-600">Created by: <span class="font-medium"><%= @form.user&.email || '—' %></span></p>
 
-<h2>Fields</h2>
-<p>
-  <%= link_to "Add field", new_field_path(form_id: @form.id) %>
-  |
-  <%= link_to "Fill this form", new_form_submission_path(@form) %>
-  |
-  <%= link_to "View submissions", form_submissions_path(@form) %>
-</p>
+<div class="mb-6 flex flex-wrap gap-2">
+  <div class="flex gap-2">
+    <%= link_to "Add field", new_field_path(form_id: @form.id), class: "btn btn-primary" %>
+  </div>
+  <%= link_to "View submissions", form_submissions_path(@form), class: "btn btn-ghost" %>
+</div>
 
-<ul>
-  <% @form.fields.ordered.each do |field| %>
-    <li>
-      <strong><%= field.label %></strong> (<%= field.field_type %>)
-      - <%= link_to 'Edit', edit_field_path(field) %>
-      - <%= link_to 'Delete', field_path(field), data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' } %>
-      <% if field.select? %>
-        <div style="margin-left: 1rem;">
-          <em>Options:</em>
-          <ul>
-            <% field.options.order(Arel.sql('COALESCE(position, 999999), id')).each do |opt| %>
-              <li><%= opt.label %> (<%= opt.value %>) - <%= link_to 'Edit', edit_option_path(opt) %></li>
-            <% end %>
-          </ul>
-          <%= link_to 'Add option', new_option_path(field_id: field.id) %>
+<% if @form.public_token.present? %>
+  <div class="mb-6 card max-w-2xl">
+    <div class="card-body">
+      <div class="flex items-end gap-2">
+        <div class="flex-1">
+          <label class="label">Shareable public URL</label>
+          <input class="input" type="text" readonly value="<%= fill_form_url(@form.public_token) %>" id="publicLinkInput">
         </div>
+        <button class="btn btn-secondary" onclick="(function(){const el=document.getElementById('publicLinkInput'); navigator.clipboard.writeText(el.value).then(()=>{const b=this; const orig=b.textContent; b.textContent='Copied'; setTimeout(()=>b.textContent=orig,1200);});}).call(this)">Copy</button>
+        <%= button_to 'Regenerate link', regenerate_link_form_path(@form), method: :post, form: { data: { turbo_confirm: 'Regenerate the public link? Existing link will stop working.' } }, class: 'btn btn-danger' %>
+      </div>
+      <p class="mt-2 text-xs text-slate-500">Anyone with this link can fill the form. No login required.</p>
+    </div>
+  </div>
+<% end %>
+
+<div class="card">
+  <table class="table">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="th">Label</th>
+        <th class="th">Type</th>
+        <th class="th">Order</th>
+        <th class="th"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      <% @form.fields.ordered.each do |field| %>
+        <tr id="<%= dom_id(field) %>">
+          <td class="td"><%= field.label %></td>
+          <td class="td"><span class="inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700 border border-slate-200"><%= field.field_type.humanize %></span></td>
+          <td class="td"><%= field.position %></td>
+          <td class="td text-right space-x-2">
+            <%= link_to 'Edit', edit_field_path(field), class: "btn btn-secondary" %>
+            <%= button_to 'Delete', field_path(field), method: :delete, form: { data: { turbo_confirm: 'Are you sure?' } }, class: "btn btn-danger" %>
+          </td>
+        </tr>
+        <% if field.select? %>
+          <tr class="bg-gray-50">
+            <td class="td" colspan="4">
+              <div class="text-sm text-gray-600">Options</div>
+              <ul class="mt-1 list-disc list-inside text-sm">
+                <% field.options.order(Arel.sql('COALESCE(position, 999999), id')).each do |opt| %>
+                  <li id="<%= dom_id(opt) %>">
+                    <span class="font-medium"><%= opt.label %></span>
+                    <span class="text-gray-500">(<%= opt.value %>)</span>
+                    <%= link_to 'Edit', edit_option_path(opt), class: "ml-2 btn btn-ghost text-xs px-2 py-1" %>
+                    <%= button_to 'Delete', option_path(opt), method: :delete, form: { data: { turbo_confirm: 'Delete this option?' } }, class: "ml-1 btn btn-ghost text-xs px-2 py-1 text-red-600" %>
+                  </li>
+                <% end %>
+              </ul>
+              <div class="mt-3">
+                <%= form_with url: options_path, method: :post, class: "grid grid-cols-1 md:grid-cols-4 gap-2 items-end" do %>
+                  <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+                  <%= hidden_field_tag 'option[field_id]', field.id %>
+                  <div>
+                    <label class="label">New option label</label>
+                    <input name="option[label]" class="input" placeholder="e.g. Red" />
+                  </div>
+                  <div>
+                    <label class="label">Value</label>
+                    <input name="option[value]" class="input" placeholder="e.g. red" />
+                  </div>
+                  <div>
+                    <label class="label">Position</label>
+                    <input type="number" name="option[position]" class="input" placeholder="optional" />
+                  </div>
+                  <div>
+                    <button class="btn btn-primary" type="submit">Add option</button>
+                  </div>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
       <% end %>
-    </li>
-  <% end %>
-</ul>
+    </tbody>
+  </table>
+</div>

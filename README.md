@@ -13,13 +13,21 @@ Small Rails 8 app to configure simple forms and collect submissions (Google Form
 - Fill a form and save a submission
 - View all submissions per form and inspect each submission
 
-## Setup
+## Setup (PostgreSQL + Tailwind)
 
 ```bash
 cd forms_app
 bundle install
-bin/rails db:setup   # creates, migrates, seeds sample data
+# Ensure PostgreSQL is running. On macOS (Homebrew):
+brew services start postgresql@14
+
+# Create/migrate/seed
+bin/rails db:setup
+
+# Start app (with Tailwind watcher in another terminal if desired)
 bin/rails server -p 3000
+# or for concurrent Tailwind watcher and Rails (requires foreman):
+bin/dev
 ```
 
 Visit http://localhost:3000
@@ -30,5 +38,6 @@ Visit http://localhost:3000
 - Fill a form via "Fill this form"; values are stored as responses.
 
 ## Notes
-- Numeric fields validate basic numeric input on submit
-- Deleting a form cascades to fields and submissions
+- PostgreSQL is now the default database (see `config/database.yml`).
+- Numeric fields validate basic numeric input on submit.
+- Deleting a form cascades to fields and submissions.

@@ -1,9 +1,8 @@
-<%= form_with(model: option) do |form| %>
+<%= form_with(model: option, class: "space-y-6 max-w-xl") do |form| %>
   <% if option.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(option.errors.count, "error") %> prohibited this option from being saved:</h2>
-
-      <ul>
+    <div class="rounded bg-red-50 text-red-800 border border-red-200 px-4 py-3">
+      <h2 class="font-medium mb-2"><%= pluralize(option.errors.count, "error") %> prevented saving:</h2>
+      <ul class="list-disc list-inside">
         <% option.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
@@ -12,31 +11,31 @@
   <% end %>
 
   <div>
-    <%= form.label :field_id, style: "display: block" %>
+    <%= form.label :field_id, class: "label" %>
     <% if params[:field_id].present? %>
       <%= form.hidden_field :field_id, value: params[:field_id] %>
-      <em>Field: <%= Field.find(params[:field_id]).label %></em>
+      <div class="text-sm text-gray-600">Field: <%= Field.find(params[:field_id]).label %></div>
     <% else %>
-      <%= form.collection_select :field_id, Field.order(:id), :id, :label, include_blank: true %>
+      <%= form.collection_select :field_id, Field.order(:id), :id, :label, { include_blank: true }, { class: "input" } %>
     <% end %>
   </div>
 
   <div>
-    <%= form.label :label, style: "display: block" %>
-    <%= form.text_field :label %>
+    <%= form.label :label, class: "label" %>
+    <%= form.text_field :label, class: "input", placeholder: "Option label (user sees this)" %>
   </div>
 
   <div>
-    <%= form.label :value, style: "display: block" %>
-    <%= form.text_field :value %>
+    <%= form.label :value, class: "label" %>
+    <%= form.text_field :value, class: "input", placeholder: "Option value (stored)" %>
   </div>
 
   <div>
-    <%= form.label :position, style: "display: block" %>
-    <%= form.number_field :position %>
+    <%= form.label :position, class: "label" %>
+    <%= form.number_field :position, class: "input", placeholder: "Optional ordering" %>
   </div>
 
   <div>
-    <%= form.submit %>
+    <%= form.submit "Save option", class: "btn btn-primary" %>
   </div>
 <% end %>

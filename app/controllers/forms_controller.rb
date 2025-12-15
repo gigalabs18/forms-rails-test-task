@@ -1,9 +1,23 @@
 class FormsController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_form, only: %i[ show edit update destroy ]
+  before_action :authorize_owner!, only: %i[ show edit update destroy ]
+
+  # POST /forms/:id/regenerate_link
+  def regenerate_link
+    @form = Form.find(params[:id])
+    authorize_owner!
+    @form.regenerate_public_token!
+    redirect_to @form, notice: 'Public link regenerated.'
+  end
 
   # GET /forms or /forms.json
   def index
-    @forms = Form.all
+    @forms = if current_user.super_admin?
+               Form.all
+             else
+               Form.where(user_id: current_user.id)
+             end
   end
 
   # GET /forms/1 or /forms/1.json
@@ -22,6 +36,7 @@ class FormsController < ApplicationController
   # POST /forms or /forms.json
   def create
     @form = Form.new(form_params)
+    @form.user ||= current_user if user_signed_in?
 
     respond_to do |format|
       if @form.save
@@ -60,11 +75,19 @@ class FormsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_form
-      @form = Form.find(params.expect(:id))
+      @form = Form.find(params[:id])
+    end
+
+    def authorize_owner!
+      return unless user_signed_in?
+      return if current_user.super_admin?
+      if @form.user_id != current_user.id
+        redirect_to forms_path, alert: 'You are not allowed to access this form.'
+      end
     end
 
     # Only allow a list of trusted parameters through.
     def form_params
-      params.expect(form: [ :title ])
+      params.require(:form).permit(:title)
     end
 end

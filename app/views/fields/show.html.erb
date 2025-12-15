@@ -1,10 +1,28 @@
-<p style="color: green"><%= notice %></p>
+<div class="card max-w-2xl">
+  <div class="card-body">
+    <h1 class="text-xl font-semibold mb-3">Field details</h1>
+    <dl class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div>
+        <dt class="text-sm text-slate-600">Form</dt>
+        <dd class="font-medium">#<%= @field.form_id %></dd>
+      </div>
+      <div>
+        <dt class="text-sm text-slate-600">Label</dt>
+        <dd class="font-medium"><%= @field.label %></dd>
+      </div>
+      <div>
+        <dt class="text-sm text-slate-600">Field type</dt>
+        <dd class="font-medium"><%= @field.field_type.humanize %></dd>
+      </div>
+      <div>
+        <dt class="text-sm text-slate-600">Position</dt>
+        <dd class="font-medium"><%= @field.position %></dd>
+      </div>
+    </dl>
 
-<%= render @field %>
-
-<div>
-  <%= link_to "Edit this field", edit_field_path(@field) %> |
-  <%= link_to "Back to fields", fields_path %>
-
-  <%= button_to "Destroy this field", @field, method: :delete %>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <%= link_to "Edit", edit_field_path(@field), class: "btn btn-secondary" %>
+      <%= button_to "Delete", field_path(@field), method: :delete, form: { data: { turbo_confirm: 'Are you sure?' } }, class: "btn btn-danger" %>
+    </div>
+  </div>
 </div>

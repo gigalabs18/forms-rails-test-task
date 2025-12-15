@@ -1,0 +1,16 @@
+<div>
+  <label for="responses_<%= field.id %>" class="label">
+    <%= field.label %><%== field.required ? ' <span class="text-red-600">*</span>' : '' %>
+  </label>
+
+  <div class="mt-1">
+    <% case field.field_type %>
+      <% when 'text' %>
+        <%= text_field_tag "responses[#{field.id}]", nil, id: "responses_#{field.id}", class: 'input', placeholder: "Enter #{field.label.downcase}", required: field.required %>
+      <% when 'number' %>
+        <%= number_field_tag "responses[#{field.id}]", nil, id: "responses_#{field.id}", class: 'input', placeholder: "Enter #{field.label.downcase}", step: 'any', required: field.required %>
+      <% when 'select' %>
+        <%= select_tag "responses[#{field.id}]", options_from_collection_for_select(field.options.order(Arel.sql('COALESCE(position, 999999), id')), 'value', 'label'), include_blank: !field.required, id: "responses_#{field.id}", class: 'input', required: field.required %>
+    <% end %>
+  </div>
+</div>

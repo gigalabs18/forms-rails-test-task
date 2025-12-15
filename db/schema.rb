@@ -10,7 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_15_105936) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_15_121500) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
   create_table "fields", force: :cascade do |t|
     t.integer "form_id", null: false
     t.string "label"
@@ -18,6 +21,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_15_105936) do
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "required", default: false, null: false
     t.index ["form_id"], name: "index_fields_on_form_id"
   end
 
@@ -25,6 +29,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_15_105936) do
     t.string "title"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.string "public_token"
+    t.index ["public_token"], name: "index_forms_on_public_token", unique: true
+    t.index ["user_id"], name: "index_forms_on_user_id"
   end
 
   create_table "options", force: :cascade do |t|
@@ -54,7 +62,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_15_105936) do
     t.index ["form_id"], name: "index_submissions_on_form_id"
   end
 
+  create_table "users", force: :cascade do |t|
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "role"
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  end
+
   add_foreign_key "fields", "forms"
+  add_foreign_key "forms", "users"
   add_foreign_key "options", "fields"
   add_foreign_key "responses", "fields"
   add_foreign_key "responses", "submissions"

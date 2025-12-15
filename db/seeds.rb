@@ -8,27 +8,15 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-puts "Seeding sample data..."
+puts "Seeding super admin..."
 
+# Destroy data in dependency order to satisfy FK constraints
 Form.destroy_all
+User.destroy_all
 
-feedback = Form.create!(title: "Website Feedback")
-name_field = feedback.fields.create!(label: "Your name", field_type: "text", position: 1)
-rating_field = feedback.fields.create!(label: "Rating (1-5)", field_type: "number", position: 2)
-topic_field = feedback.fields.create!(label: "Topic", field_type: "select", position: 3)
-topic_field.options.create!([
-	{ label: "Bug", value: "bug", position: 1 },
-	{ label: "Feature Request", value: "feature", position: 2 },
-	{ label: "General", value: "general", position: 3 }
-])
+admin_email = ENV.fetch("SUPER_ADMIN_EMAIL", "admin@example.com")
+admin_password = ENV.fetch("SUPER_ADMIN_PASSWORD", "password")
 
-survey = Form.create!(title: "Quick Survey")
-survey.fields.create!(label: "Age", field_type: "number", position: 1)
-survey_select = survey.fields.create!(label: "Favorite Color", field_type: "select", position: 2)
-survey_select.options.create!([
-	{ label: "Red", value: "red" },
-	{ label: "Green", value: "green" },
-	{ label: "Blue", value: "blue" }
-])
+admin = User.create!(email: admin_email, password: admin_password, password_confirmation: admin_password, role: :super_admin)
 
-puts "Seeded #{Form.count} forms, #{Field.count} fields, #{Option.count} options."
+puts "Seeded super admin: #{admin.email}"

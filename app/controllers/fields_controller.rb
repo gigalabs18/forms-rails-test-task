@@ -1,4 +1,5 @@
 class FieldsController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_field, only: %i[ show edit update destroy ]
 
   # GET /fields or /fields.json
@@ -12,7 +13,14 @@ class FieldsController < ApplicationController
 
   # GET /fields/new
   def new
+    if params[:form_id].blank?
+      redirect_to forms_path, alert: "Open a form and click Add field." and return
+    end
     @field = Field.new
+    # Preselect form and field type if provided (e.g., from "Add select field" link)
+    @field.form_id = params[:form_id]
+    preset_type = params[:field_type] || params[:type]
+    @field.field_type = preset_type if preset_type.present?
   end
 
   # GET /fields/1/edit
@@ -25,7 +33,23 @@ class FieldsController < ApplicationController
 
     respond_to do |format|
       if @field.save
-        format.html { redirect_to @field, notice: "Field was successfully created." }
+        # If select type, create options from structured params (label/value pairs)
+        if @field.field_type == 'select'
+          used_values = {}
+          Array(params[:options]).each_with_index do |opt, idx|
+            next unless opt.is_a?(ActionController::Parameters) || opt.is_a?(Hash)
+            label = opt[:label].to_s.strip
+            value = opt[:value].to_s.strip
+            next if label.blank?
+            value = value.presence || label.downcase
+            next if used_values[value]
+            used_values[value] = true
+            @field.options.create(label: label, value: value, position: (opt[:position].presence || idx + 1))
+          end
+        end
+        # Always go back to the parent form's show page after creating a field
+        target = @field.form_id.present? ? form_path(@field.form_id) : fields_path
+        format.html { redirect_to target, notice: "Field was successfully created." }
         format.json { render :show, status: :created, location: @field }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -38,7 +62,8 @@ class FieldsController < ApplicationController
   def update
     respond_to do |format|
       if @field.update(field_params)
-        format.html { redirect_to @field, notice: "Field was successfully updated.", status: :see_other }
+        target = @field.form_id.present? ? form_path(@field.form_id) : fields_path
+        format.html { redirect_to target, notice: "Field was successfully updated.", status: :see_other }
         format.json { render :show, status: :ok, location: @field }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -49,10 +74,10 @@ class FieldsController < ApplicationController
 
   # DELETE /fields/1 or /fields/1.json
   def destroy
+    @form = @field.form
     @field.destroy!
-
     respond_to do |format|
-      format.html { redirect_to fields_path, notice: "Field was successfully destroyed.", status: :see_other }
+      format.html { redirect_to form_path(@form), notice: "Field was successfully destroyed.", status: :see_other }
       format.json { head :no_content }
     end
   end
@@ -60,11 +85,11 @@ class FieldsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_field
-      @field = Field.find(params.expect(:id))
+      @field = Field.find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.
     def field_params
-      params.expect(field: [ :form_id, :label, :field_type, :position ])
+      params.require(:field).permit(:form_id, :label, :field_type, :position, :required)
     end
 end

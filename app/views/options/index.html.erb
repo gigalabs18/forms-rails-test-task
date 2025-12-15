@@ -1,16 +1,29 @@
-<p style="color: green"><%= notice %></p>
-
 <% content_for :title, "Options" %>
 
-<h1>Options</h1>
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-semibold">Options</h1>
+  <%= link_to "New option", new_option_path, class: "btn btn-primary" %>
+  </div>
 
-<div id="options">
+<div id="options" class="grid gap-3">
   <% @options.each do |option| %>
-    <%= render option %>
-    <p>
-      <%= link_to "Show this option", option %>
-    </p>
+    <div id="<%= dom_id(option) %>" class="card">
+      <div class="card-body">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-medium"><%= option.label %></h2>
+            <p class="text-sm text-slate-600">Value: <span class="font-mono"><%= option.value %></span></p>
+            <% if option.position.present? %>
+              <p class="text-sm text-slate-500">Position: <%= option.position %></p>
+            <% end %>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <%= link_to "Show", option_path(option), class: "btn btn-secondary" %>
+            <%= link_to "Edit", edit_option_path(option), class: "btn btn-ghost" %>
+            <%= button_to "Delete", option_path(option), method: :delete, form: { data: { turbo_confirm: 'Are you sure?' } }, class: "btn btn-danger" %>
+          </div>
+        </div>
+      </div>
+    </div>
   <% end %>
 </div>
-
-<%= link_to "New option", new_option_path %>

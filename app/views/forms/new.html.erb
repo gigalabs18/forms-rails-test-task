@@ -1,11 +1,30 @@
 <% content_for :title, "New form" %>
 
-<h1>New form</h1>
-
-<%= render "form", form: @form %>
-
-<br>
-
-<div>
-  <%= link_to "Back to forms", forms_path %>
+<div class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl font-semibold">New form</h1>
+  <%= link_to "Back to forms", forms_path, class: "btn-ghost" %>
 </div>
+
+<div class="card"><div class="card-body">
+  <%= form_with(model: @form, class: "space-y-4") do |f| %>
+    <% if @form.errors.any? %>
+      <div class="rounded bg-red-50 text-red-800 border border-red-200 px-4 py-3">
+        <h2 class="font-medium mb-2"><%= pluralize(@form.errors.count, "error") %> prevented saving:</h2>
+        <ul class="list-disc list-inside">
+          <% @form.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div>
+      <%= f.label :title, class: "label" %>
+      <%= f.text_field :title, class: "input" %>
+    </div>
+
+    <div>
+      <%= f.submit "Create Form", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div></div>

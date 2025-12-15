@@ -1,0 +1,40 @@
+<div class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl font-semibold">New user</h1>
+  <%= link_to "Back", admin_users_path, class: "btn btn-ghost" %>
+</div>
+
+<div class="card max-w-lg">
+  <div class="card-body">
+    <%= form_with model: @user, url: admin_users_path, class: "space-y-4" do |f| %>
+      <% if @user.errors.any? %>
+        <div class="rounded bg-red-50 text-red-800 border border-red-200 px-4 py-3">
+          <h2 class="font-medium mb-2"><%= pluralize(@user.errors.count, "error") %> prevented saving:</h2>
+          <ul class="list-disc list-inside">
+            <% @user.errors.each do |error| %>
+              <li><%= error.full_message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :email, class: "label" %>
+        <%= f.email_field :email, class: "input" %>
+      </div>
+
+      <div>
+        <%= f.label :password, class: "label" %>
+        <%= f.password_field :password, class: "input" %>
+      </div>
+
+      <div>
+        <%= f.label :password_confirmation, class: "label" %>
+        <%= f.password_field :password_confirmation, class: "input" %>
+      </div>
+
+      <div>
+        <%= f.submit "Create user", class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

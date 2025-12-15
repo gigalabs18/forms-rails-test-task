@@ -1,25 +1,28 @@
-<h1>Submissions for: <%= @form.title %></h1>
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-semibold">Submissions for: <%= @form.title %></h1>
+  <div class="space-x-2">
+    <%= link_to 'Back to forms', forms_path, class: "btn btn-ghost" %>
+    <%= link_to 'Fill this form', new_form_submission_path(@form), class: "btn btn-primary" %>
+  </div>
+</div>
 
-<p>
-  <%= link_to 'Back to forms', forms_path %> |
-  <%= link_to 'Fill this form', new_form_submission_path(@form) %>
-  </p>
-
-<table>
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Submitted at</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @submissions.each do |s| %>
+<div class="card">
+  <table class="table">
+    <thead class="bg-gray-50">
       <tr>
-        <td><%= s.id %></td>
-        <td><%= s.created_at.strftime('%Y-%m-%d %H:%M') %></td>
-        <td><%= link_to 'View', form_submission_path(@form, s) %></td>
+        <th class="th">ID</th>
+        <th class="th">Submitted at</th>
+        <th class="th"></th>
       </tr>
-    <% end %>
-  </tbody>
-</table>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      <% @submissions.each do |s| %>
+        <tr>
+          <td class="td">#<%= s.id %></td>
+          <td class="td"><%= s.created_at.strftime('%Y-%m-%d %H:%M') %></td>
+          <td class="td text-right"><%= link_to 'View', form_submission_path(@form, s), class: "btn btn-secondary" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

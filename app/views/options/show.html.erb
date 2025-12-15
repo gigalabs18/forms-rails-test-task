@@ -1,10 +1,29 @@
-<p style="color: green"><%= notice %></p>
+<div class="card max-w-2xl">
+  <div class="card-body">
+    <h1 class="text-xl font-semibold mb-3">Option details</h1>
+    <dl class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div>
+        <dt class="text-sm text-slate-600">Field</dt>
+        <dd class="font-medium">#<%= @option.field_id %></dd>
+      </div>
+      <div>
+        <dt class="text-sm text-slate-600">Label</dt>
+        <dd class="font-medium"><%= @option.label %></dd>
+      </div>
+      <div>
+        <dt class="text-sm text-slate-600">Value</dt>
+        <dd class="font-medium"><%= @option.value %></dd>
+      </div>
+      <div>
+        <dt class="text-sm text-slate-600">Position</dt>
+        <dd class="font-medium"><%= @option.position %></dd>
+      </div>
+    </dl>
 
-<%= render @option %>
-
-<div>
-  <%= link_to "Edit this option", edit_option_path(@option) %> |
-  <%= link_to "Back to options", options_path %>
-
-  <%= button_to "Destroy this option", @option, method: :delete %>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <%= link_to "Edit", edit_option_path(@option), class: "btn btn-secondary" %>
+      <%= link_to "Back to options", options_path, class: "btn btn-ghost" %>
+      <%= link_to "Delete", option_path(@option), data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: "btn btn-danger" %>
+    </div>
+  </div>
 </div>
