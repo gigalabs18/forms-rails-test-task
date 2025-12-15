@@ -58,7 +58,7 @@
             <%= button_to 'Delete', field_path(field), method: :delete, form: { data: { turbo_confirm: 'Are you sure?' } }, class: "btn btn-danger" %>
           </td>
         </tr>
-        <% if field.select? %>
+        <% if field.select? && field.options.any? %>
           <tr class="bg-gray-50">
             <td class="td" colspan="4">
               <div class="text-sm text-gray-600">Options</div>
@@ -72,27 +72,6 @@
                   </li>
                 <% end %>
               </ul>
-              <div class="mt-3">
-                <%= form_with url: options_path, method: :post, class: "grid grid-cols-1 md:grid-cols-4 gap-2 items-end" do %>
-                  <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
-                  <%= hidden_field_tag 'option[field_id]', field.id %>
-                  <div>
-                    <label class="label">New option label</label>
-                    <input name="option[label]" class="input" placeholder="e.g. Red" />
-                  </div>
-                  <div>
-                    <label class="label">Value</label>
-                    <input name="option[value]" class="input" placeholder="e.g. red" />
-                  </div>
-                  <div>
-                    <label class="label">Position</label>
-                    <input type="number" name="option[position]" class="input" placeholder="optional" />
-                  </div>
-                  <div>
-                    <button class="btn btn-primary" type="submit">Add option</button>
-                  </div>
-                <% end %>
-              </div>
             </td>
           </tr>
         <% end %>
