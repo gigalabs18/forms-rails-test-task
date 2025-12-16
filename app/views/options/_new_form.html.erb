@@ -14,7 +14,9 @@
       </div>
     <% end %>
     <%= form_with url: options_path, method: :post, data: { turbo_stream: true }, class: "grid grid-cols-1 gap-2 items-end" do %>
-      <%= hidden_field_tag 'option[field_id]', field.id %>
+      <%# Resolve field id robustly from locals or the option instance to avoid nil errors %>
+      <% fid = (defined?(field) && field) ? field.id : (defined?(option) && option ? option.field_id : nil) %>
+        <%= hidden_field_tag 'option[field_id]', fid %>
       <div>
         <label class="label">New option label</label>
         <input name="option[label]" class="input" placeholder="e.g. Option 1" />

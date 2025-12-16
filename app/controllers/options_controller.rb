@@ -32,11 +32,13 @@ class OptionsController < ApplicationController
         end
         format.json { render :show, status: :created, location: @option }
       else
+        # Ensure we still have a field to render the form under even if field_id was missing
+        field_for_render = @option.field || Field.find_by(id: params.dig(:option, :field_id))
         format.turbo_stream do
           render turbo_stream: turbo_stream.replace(
-            "new_option_form_for_#{@option.field_id}",
+            "new_option_form_for_#{@option.field_id || field_for_render&.id}",
             partial: "options/new_form",
-            locals: { field: @option.field, option: @option }
+            locals: { field: field_for_render, option: @option }
           )
         end
         format.html do
