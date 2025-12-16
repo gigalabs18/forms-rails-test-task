@@ -189,6 +189,17 @@
       }
     });
 
+    // After successfully adding a new option, collapse the add-option panel
+    document.addEventListener('turbo:submit-end', function(e){
+      var formEl = e.target;
+      if(!(formEl && formEl.classList && formEl.classList.contains('new-option-form'))) return;
+      if(e.detail && e.detail.success){
+        var root = formEl.closest('[data-controller="toggle"]');
+        var panel = root && root.querySelector('[data-toggle-target="toggleable"]');
+        if(panel){ panel.classList.add('hidden'); panel.style.display='none'; }
+      }
+    });
+
     // Also collapse option editors around Turbo Stream renders to keep UI consistent
     document.addEventListener('turbo:before-stream-render', function(){ collapseOptionEditors(); });
     document.addEventListener('turbo:render', function(){ collapseOptionEditors(); });
