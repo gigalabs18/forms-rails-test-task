@@ -194,6 +194,7 @@
       var formEl = e.target;
       if(!(formEl && formEl.classList && formEl.classList.contains('new-option-form'))) return;
       if(e.detail && e.detail.success){
+        try { formEl.reset(); } catch(_) {}
         var root = formEl.closest('[data-controller="toggle"]');
         var panel = root && root.querySelector('[data-toggle-target="toggleable"]');
         if(panel){ panel.classList.add('hidden'); panel.style.display='none'; }

@@ -22,7 +22,10 @@
           <%= f.text_field :label, class: 'input w-full', placeholder: 'Question title' %>
         </div>
         <div>
-          <%= f.select :field_type, Field.field_types.keys.map { |t| [t.humanize, t] }, {}, class: 'input w-full', onchange: 'this.form.requestSubmit()' %>
+          <%= f.select :field_type,
+                Field.field_types.keys.map { |t| [t == 'select' ? 'Select/Combo box' : t.humanize, t] },
+                {},
+                class: 'input w-full', onchange: 'this.form.requestSubmit()' %>
         </div>
       </div>
       <div class="flex items-center justify-between pt-2">

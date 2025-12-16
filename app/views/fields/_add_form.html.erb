@@ -14,10 +14,17 @@
       <%= text_field_tag 'field[label]', (field&.label), class: 'input w-full', placeholder: 'Question title', id: 'newFieldLabel' %>
     </div>
     <div>
-      <%= select_tag 'field[field_type]', options_for_select(Field.field_types.keys.map { |t| [t.humanize, t] }, (field&.field_type.presence || 'text')), class: 'input w-full', id: 'newFieldType', data: { form_show_target: 'newFieldType', action: 'change->form-show#updateOptionsVisibility' } %>
+      <%= select_tag 'field[field_type]',
+          options_for_select(
+            Field.field_types.keys.map { |t| [t == 'select' ? 'Select/Combo box' : t.humanize, t] },
+            (field&.field_type.presence || 'text')
+          ),
+          class: 'input w-full', id: 'newFieldType',
+          data: { form_show_target: 'newFieldType', action: 'change->form-show#updateOptionsVisibility' } %>
     </div>
   </div>
-  <div id="initialOptionsSection" class="hidden border-t border-slate-200 pt-3" style="display:none;" data-form-show-target="initialOptionsSection">
+  <% show_initial_opts = (field && field.respond_to?(:type_select?) && field.type_select?) %>
+  <div id="initialOptionsSection" class="<%= show_initial_opts ? '' : 'hidden' %> border-t border-slate-200 pt-3" style="<%= show_initial_opts ? '' : 'display:none;' %>" data-form-show-target="initialOptionsSection">
     <label class="label">Initial options</label>
     <div id="initialOptionsRepeater" class="space-y-2" data-form-show-target="initialOptionsRepeater">
       <div class="grid grid-cols-5 gap-2 items-end option-row">

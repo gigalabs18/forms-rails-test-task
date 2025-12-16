@@ -32,24 +32,35 @@ class FieldsController < ApplicationController
     @field = Field.new(field_params)
 
     respond_to do |format|
-      if @field.save
+      # Gather any initial options from params in a safe, whitelisted way
+      permitted_opts = params.permit(options: [:label, :value])[:options]
+      initial_options = (permitted_opts || {}).values
+      present_options = initial_options.select { |opt| opt[:label].to_s.strip.present? }
+
+      # Validation: Select fields must include at least one option
+      if @field.type_select? && present_options.empty?
+        @field.errors.add(:base, "Select fields must include at least one option")
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            'addQuestionCardBody',
+            partial: 'fields/add_card_body',
+            locals: { field: @field }
+          ), status: :unprocessable_entity
+        end
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: @field.errors, status: :unprocessable_entity }
+      elsif @field.save
         # If select type, create options from structured params (label/value pairs)
         if @field.type_select?
           used_values = {}
-          # Permit a hash of options where each option has a label and a value.
-          # This is more secure than using to_unsafe_h.
-          if params[:options].present?
-            # Permit only expected keys to avoid mass-assignment of arbitrary params
-            permitted = params.permit(options: [:label, :value])[:options]
-            (permitted || {}).values.each do |opt|
-              label = opt[:label].to_s.strip
-              value = opt[:value].to_s.strip
-              next if label.blank?
-              value = value.presence || label.parameterize
-              next if used_values[value]
-              used_values[value] = true
-              @field.options.create(label: label, value: value)
-            end
+          present_options.each do |opt|
+            label = opt[:label].to_s.strip
+            value = opt[:value].to_s.strip
+            next if label.blank?
+            value = value.presence || label.parameterize
+            next if used_values[value]
+            used_values[value] = true
+            @field.options.create(label: label, value: value)
           end
         end
         # Turbo: append new builder card inline on the form page
@@ -80,6 +91,29 @@ class FieldsController < ApplicationController
 
   # PATCH/PUT /fields/1 or /fields/1.json
   def update
+    # If the field is already a select without options, prevent updating it further
+    # unless the change is switching away from select. This enforces that select
+    # fields must always have at least one option.
+    if @field.type_select? && @field.options.none?
+      new_type = field_params[:field_type]
+      if new_type.nil? || new_type == 'select'
+        respond_to do |format|
+          format.turbo_stream do
+            target_id = view_context.dom_id(@field, :card)
+            render turbo_stream: turbo_stream.replace(
+              target_id,
+              partial: 'fields/builder_card',
+              locals: { field: @field, inline_alert: 'Select fields must include at least one option' }
+            ), status: :unprocessable_entity
+          end
+          target = @field.form_id.present? ? form_path(@field.form_id) : fields_path
+          format.html { redirect_to target, alert: 'Select fields must include at least one option' }
+          format.json { render json: { error: 'Select fields must include at least one option' }, status: :unprocessable_entity }
+        end
+        return
+      end
+    end
+
     respond_to do |format|
       if @field.update(field_params)
         target = @field.form_id.present? ? form_path(@field.form_id) : fields_path
