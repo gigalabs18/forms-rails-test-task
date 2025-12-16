@@ -4,12 +4,12 @@ Rails.application.routes.draw do
   resources :fields
   resources :forms do
     post :regenerate_link, on: :member
-    resources :submissions, only: [:index, :new, :create, :show]
+    resources :submissions, only: [ :index, :new, :create, :show ]
   end
   # Public short link to fill a form without authentication (via token)
   get "f/:token", to: "submissions#new", as: :fill_form
   namespace :admin do
-    resources :users, only: [:index, :new, :create, :edit, :update, :destroy]
+    resources :users, only: [ :index, :new, :create, :edit, :update, :destroy ]
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

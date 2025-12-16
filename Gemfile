@@ -57,4 +57,6 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  # Use sqlite3 for tests to simplify CI database setup
+  gem "sqlite3", ">= 2.1"
 end

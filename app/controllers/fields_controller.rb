@@ -33,7 +33,7 @@ class FieldsController < ApplicationController
 
     respond_to do |format|
       # Gather any initial options from params in a safe, whitelisted way
-      permitted_opts = params.permit(options: [:label, :value])[:options]
+      permitted_opts = params.permit(options: [ :label, :value ])[:options]
       initial_options = (permitted_opts || {}).values
       present_options = initial_options.select { |opt| opt[:label].to_s.strip.present? }
 
@@ -42,8 +42,8 @@ class FieldsController < ApplicationController
         @field.errors.add(:base, "Select fields must include at least one option")
         format.turbo_stream do
           render turbo_stream: turbo_stream.replace(
-            'addQuestionCardBody',
-            partial: 'fields/add_card_body',
+            "addQuestionCardBody",
+            partial: "fields/add_card_body",
             locals: { field: @field }
           ), status: :unprocessable_entity
         end
@@ -78,8 +78,8 @@ class FieldsController < ApplicationController
       else
         format.turbo_stream do
           render turbo_stream: turbo_stream.replace(
-            'addQuestionCardBody',
-            partial: 'fields/add_card_body',
+            "addQuestionCardBody",
+            partial: "fields/add_card_body",
             locals: { field: @field }
           ), status: :unprocessable_entity
         end
@@ -96,19 +96,19 @@ class FieldsController < ApplicationController
     # fields must always have at least one option.
     if @field.type_select? && @field.options.none?
       new_type = field_params[:field_type]
-      if new_type.nil? || new_type == 'select'
+      if new_type.nil? || new_type == "select"
         respond_to do |format|
           format.turbo_stream do
             target_id = view_context.dom_id(@field, :card)
             render turbo_stream: turbo_stream.replace(
               target_id,
-              partial: 'fields/builder_card',
-              locals: { field: @field, inline_alert: 'Select fields must include at least one option' }
+              partial: "fields/builder_card",
+              locals: { field: @field, inline_alert: "Select fields must include at least one option" }
             ), status: :unprocessable_entity
           end
           target = @field.form_id.present? ? form_path(@field.form_id) : fields_path
-          format.html { redirect_to target, alert: 'Select fields must include at least one option' }
-          format.json { render json: { error: 'Select fields must include at least one option' }, status: :unprocessable_entity }
+          format.html { redirect_to target, alert: "Select fields must include at least one option" }
+          format.json { render json: { error: "Select fields must include at least one option" }, status: :unprocessable_entity }
         end
         return
       end
@@ -121,8 +121,8 @@ class FieldsController < ApplicationController
           target_id = view_context.dom_id(@field, :card)
           render turbo_stream: turbo_stream.replace(
             target_id,
-            partial: 'fields/builder_card',
-            locals: { field: @field, inline_notice: 'Question updated' }
+            partial: "fields/builder_card",
+            locals: { field: @field, inline_notice: "Question updated" }
           )
         end
         format.html { redirect_to target, notice: "Field was successfully updated.", status: :see_other }
@@ -132,7 +132,7 @@ class FieldsController < ApplicationController
           target_id = view_context.dom_id(@field, :card)
           render turbo_stream: turbo_stream.replace(
             target_id,
-            partial: 'fields/builder_card',
+            partial: "fields/builder_card",
             locals: { field: @field, inline_alert: @field.errors.full_messages.to_sentence }
           ), status: :unprocessable_entity
         end

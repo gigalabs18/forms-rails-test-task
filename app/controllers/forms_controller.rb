@@ -9,22 +9,23 @@ class FormsController < ApplicationController
     respond_to do |format|
       format.turbo_stream do
         render turbo_stream: turbo_stream.replace(
-          'public_link_card',
-          partial: 'forms/public_link_card',
+          "public_link_card",
+          partial: "forms/public_link_card",
           locals: { form: @form }
         )
       end
-      format.html { redirect_to @form, notice: 'Public link regenerated.' }
+      format.html { redirect_to @form, notice: "Public link regenerated." }
     end
   end
 
   # GET /forms or /forms.json
   def index
-    @forms = if current_user.super_admin?
-               Form.all
-             else
-               Form.where(user_id: current_user.id)
-             end
+    @forms =
+      if current_user.super_admin?
+        Form.all
+      else
+        Form.where(user_id: current_user.id)
+      end
   end
 
   # GET /forms/1 or /forms/1.json
@@ -95,7 +96,7 @@ class FormsController < ApplicationController
     def authorize_owner!
       form = @form || Form.find(params[:id])
       unless current_user.super_admin? || form.user_id == current_user.id
-        redirect_to forms_path, alert: 'You are not authorized to access that form.'
+        redirect_to forms_path, alert: "You are not authorized to access that form."
       end
     end
 

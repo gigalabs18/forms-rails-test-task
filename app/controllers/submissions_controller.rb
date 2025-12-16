@@ -1,8 +1,8 @@
 class SubmissionsController < ApplicationController
   before_action :set_form
-  before_action :authenticate_user!, only: [:index, :show]
-  before_action :ensure_owner!, only: [:index, :show]
-  before_action :set_submission, only: [:show]
+  before_action :authenticate_user!, only: [ :index, :show ]
+  before_action :ensure_owner!, only: [ :index, :show ]
+  before_action :set_submission, only: [ :show ]
 
   def index
     @submissions = @form.submissions.order(created_at: :desc)
@@ -14,12 +14,13 @@ class SubmissionsController < ApplicationController
 
   def create
     @submission = @form.submissions.new
-    responses_hash = if params[:responses].present?
-                        # Permit only the keys that correspond to the IDs of the fields in the current form.
-                        params.require(:responses).permit(@form.fields.pluck(:id).map(&:to_s)).to_h
-                      else
-                        {}
-                      end
+    responses_hash =
+      if params[:responses].present?
+        # Permit only the keys that correspond to the IDs of the fields in the current form.
+        params.require(:responses).permit(@form.fields.pluck(:id).map(&:to_s)).to_h
+      else
+        {}
+      end
 
     errors = validate_responses(responses_hash)
     return render(:new, status: :unprocessable_entity) if surfaced_errors?(errors)
@@ -33,9 +34,9 @@ class SubmissionsController < ApplicationController
     end
 
     if user_signed_in?
-      redirect_to form_submission_path(@form, @submission), notice: 'Submission recorded.'
+      redirect_to form_submission_path(@form, @submission), notice: "Submission recorded."
     else
-      redirect_to fill_form_path(@form.public_token), notice: 'Thanks! Your response has been recorded.'
+      redirect_to fill_form_path(@form.public_token), notice: "Thanks! Your response has been recorded."
     end
   rescue ActiveRecord::RecordInvalid => e
     flash.now[:alert] = e.message
@@ -60,9 +61,9 @@ class SubmissionsController < ApplicationController
         end
         next if val.nil? || val.to_s.strip.empty?
         case field.field_type
-        when 'number'
+        when "number"
           errs << "#{field.label} must be a number" unless numeric_string?(val)
-        when 'select'
+        when "select"
           valid_values = field.options.pluck(:value)
           errs << "#{field.label} has an invalid selection" unless valid_values.include?(val)
         end
@@ -72,7 +73,7 @@ class SubmissionsController < ApplicationController
 
     def surfaced_errors?(errors)
       return false if errors.empty?
-      flash.now[:alert] = errors.join(', ')
+      flash.now[:alert] = errors.join(", ")
       true
     end
 
@@ -84,11 +85,12 @@ class SubmissionsController < ApplicationController
       /x.match?(str.to_s)
     end
     def set_form
-      @form = if params[:token].present?
-                Form.find_by!(public_token: params[:token])
-              else
-                Form.find(params[:form_id])
-              end
+      @form =
+        if params[:token].present?
+          Form.find_by!(public_token: params[:token])
+        else
+          Form.find(params[:form_id])
+        end
     end
 
     def set_submission
@@ -97,7 +99,7 @@ class SubmissionsController < ApplicationController
 
     def ensure_owner!
       if @form.user_id.present? && (!user_signed_in? || @form.user_id != current_user.id)
-        redirect_to forms_path, alert: 'Only the owner can view submissions.'
+        redirect_to forms_path, alert: "Only the owner can view submissions."
       end
     end
 end
