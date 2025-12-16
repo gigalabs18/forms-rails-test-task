@@ -84,6 +84,7 @@ Rails.application.configure do
   config.hosts = []
   config.hosts << /[a-z0-9-]+\.ngrok\.app/
   config.hosts << /[a-z0-9-]+\.ngrok\.io/
+  config.hosts << "165.22.219.99"
   # Optional comma-separated override: RAILS_ALLOWED_HOSTS="foo.com,bar.example"
   if ENV["RAILS_ALLOWED_HOSTS"].present?
     ENV["RAILS_ALLOWED_HOSTS"].split(/,\s*/).each { |h| config.hosts << h }

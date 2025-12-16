@@ -18,23 +18,7 @@
 <p class="mb-2 text-sm text-slate-600">Created by: <span class="font-medium"><%= @form.user&.email || '—' %></span></p>
 
 <% if @form.public_token.present? %>
-  <div class="mb-6 card max-w-4xl">
-    <div class="card-body">
-      <div class="flex flex-col md:flex-row md:items-center gap-3">
-        <div class="flex-1">
-          <label class="label">Shareable public URL:</label>
-          <input class="input" type="text" readonly value="<%= fill_form_url(@form.public_token) %>" data-form-show-target="publicLinkInput" id="publicLinkInput">
-        </div>
-        <div class="flex-1">
-          <label class="label">Actions:</label>
-          <%= link_to 'Regenerate link', regenerate_link_form_path(@form), method: :post, data: { turbo_confirm: 'Regenerate the public link? Existing link will stop working.' }, class: 'btn btn-danger shrink-0' %>
-          <button type="button" class="btn btn-secondary shrink-0" data-action="form-show#copyLink" data-form-show-target="copyButton">Copy Link</button>
-          <%= link_to "View submissions", form_submissions_path(@form), class: "btn btn-secondary shrink-0" %>
-        </div>
-      </div>
-      <p class="mt-2 text-xs text-slate-500">Anyone with this link can fill the form. No login required.</p>
-    </div>
-  </div>
+  <%= render 'forms/public_link_card', form: @form %>
 <% end %>
 
 <div id="fields_table_body">
@@ -55,6 +39,24 @@
 
 <script>
   document.addEventListener('turbo:load', function() {
+        // Copy link (inline fallback without Stimulus)
+        function copyPublicLink(){
+          var input = document.getElementById('publicLinkInput');
+          var btn = document.getElementById('copyPublicLink');
+          if(!input) return;
+          var url = input.value;
+          var done = function(){ if(btn){ var old=btn.textContent; btn.textContent='Copied'; setTimeout(function(){ btn.textContent=old; }, 1200); } };
+          if(navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(url).then(done).catch(function(){
+              input.select(); document.execCommand('copy'); done();
+            });
+          } else {
+            input.select(); document.execCommand('copy'); done();
+          }
+        }
+        document.addEventListener('click', function(e){
+          if(e.target && e.target.id === 'copyPublicLink'){ copyPublicLink(); }
+        });
     var btn = document.getElementById('fabAddQuestion');
     var card = document.getElementById('addQuestionCard');
 

@@ -34,7 +34,7 @@ class FieldsController < ApplicationController
     respond_to do |format|
       if @field.save
         # If select type, create options from structured params (label/value pairs)
-        if @field.field_type == 'select'
+        if @field.type_select?
           used_values = {}
           # Permit a hash of options where each option has a label and a value.
           # This is more secure than using to_unsafe_h.

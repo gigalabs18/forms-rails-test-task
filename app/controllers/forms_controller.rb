@@ -6,7 +6,16 @@ class FormsController < ApplicationController
   # POST /forms/:id/regenerate_link
   def regenerate_link
     @form.regenerate_public_token!
-    redirect_to @form, notice: 'Public link regenerated.'
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          'public_link_card',
+          partial: 'forms/public_link_card',
+          locals: { form: @form }
+        )
+      end
+      format.html { redirect_to @form, notice: 'Public link regenerated.' }
+    end
   end
 
   # GET /forms or /forms.json

@@ -1,24 +1,6 @@
 class OptionsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_option, only: %i[ show edit update destroy ]
-
-  # GET /options or /options.json
-  def index
-    @options = Option.all
-  end
-
-  # GET /options/1 or /options/1.json
-  def show
-  end
-
-  # GET /options/new
-  def new
-    @option = Option.new
-  end
-
-  # GET /options/1/edit
-  def edit
-  end
+  before_action :set_option, only: %i[ update destroy ]
 
   # POST /options or /options.json
   def create

@@ -30,7 +30,7 @@
   <div>
     <%= form.label :field_type, class: "label" %>
     <div class="mt-2 grid grid-cols-3 gap-2">
-      <% Field::FIELD_TYPES.each do |t| %>
+      <% Field.field_types.keys.each do |t| %>
         <label class="flex items-center gap-2 rounded border border-slate-300 bg-white px-3 py-2 cursor-pointer">
           <%= form.radio_button :field_type, t, class: "h-4 w-4", data: { action: "change->field-form#updateOptionsVisibility" } %>
           <span class="text-sm"><%= t.humanize %></span>

@@ -22,7 +22,7 @@
           <%= f.text_field :label, class: 'input w-full', placeholder: 'Question title' %>
         </div>
         <div>
-          <%= f.select :field_type, Field::FIELD_TYPES.map { |t| [t.humanize, t] }, {}, class: 'input w-full', onchange: 'this.form.requestSubmit()' %>
+          <%= f.select :field_type, Field.field_types.keys.map { |t| [t.humanize, t] }, {}, class: 'input w-full', onchange: 'this.form.requestSubmit()' %>
         </div>
       </div>
       <div class="flex items-center justify-between pt-2">
@@ -37,7 +37,7 @@
       </div>
     <% end %>
 
-    <% if field.select? %>
+    <% if field.type_select? %>
       <div class="mt-4 border-t border-slate-200 pt-4">
         <ul id="options_list_for_<%= field.id %>" class="space-y-1">
           <% field.options.each do |opt| %>
