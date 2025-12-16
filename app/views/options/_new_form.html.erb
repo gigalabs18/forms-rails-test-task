@@ -13,7 +13,7 @@
         </ul>
       </div>
     <% end %>
-    <%= form_with url: options_path, method: :post, data: { turbo_stream: true }, class: "grid grid-cols-1 gap-2 items-end" do %>
+    <%= form_with url: options_path, method: :post, data: { turbo_stream: true }, class: "grid gap-2 items-end" do %>
       <%# Resolve field id robustly from locals or the option instance to avoid nil errors %>
       <% fid = (defined?(field) && field) ? field.id : (defined?(option) && option ? option.field_id : nil) %>
         <%= hidden_field_tag 'option[field_id]', fid %>

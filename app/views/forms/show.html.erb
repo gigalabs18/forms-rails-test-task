@@ -86,8 +86,8 @@
         var root = t.closest && t.closest('[data-controller="toggle"]');
         var panel = root && root.querySelector('[data-toggle-target="toggleable"]');
         if(panel){ panel.classList.add('hidden'); panel.style.display='none';
-          // clear inputs inside panel for a clean state next open
-          panel.querySelectorAll('input').forEach(function(i){ try{ i.value=''; }catch(_){} });
+          // clear only text inputs; keep hidden field_id intact for next open
+          panel.querySelectorAll('input[type="text"]').forEach(function(i){ try{ i.value=''; }catch(_){} });
         }
         return;
       }
