@@ -7,6 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <%= turbo_include_tags if defined?(turbo_include_tags) %>
 
     <%= yield :head %>
 
@@ -27,7 +28,7 @@
       <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <a href="/" class="text-lg font-semibold">Forms App</a>
         <div class="flex items-center gap-2">
-          <%= link_to "All Forms", forms_path, class: "btn btn-ghost" %>
+          <%= link_to "All Forms", forms_path, class: "btn btn-secondary" %>
           <% if user_signed_in? %>
             <% if current_user.super_admin? %>
               <%= link_to "Users", admin_users_path, class: "btn btn-secondary" %>

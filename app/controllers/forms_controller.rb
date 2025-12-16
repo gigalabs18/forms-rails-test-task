@@ -1,12 +1,10 @@
 class FormsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_form, only: %i[ show edit update destroy ]
-  before_action :authorize_owner!, only: %i[ show edit update destroy ]
+  before_action :set_form, only: %i[ show edit update destroy regenerate_link ]
+  before_action :authorize_owner!, only: %i[ show edit update destroy regenerate_link ]
 
   # POST /forms/:id/regenerate_link
   def regenerate_link
-    @form = Form.find(params[:id])
-    authorize_owner!
     @form.regenerate_public_token!
     redirect_to @form, notice: 'Public link regenerated.'
   end
@@ -75,14 +73,20 @@ class FormsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_form
-      @form = Form.find(params[:id])
+      # For super admins, allow access to any form; otherwise scope to current user's forms
+      @form = current_user.super_admin? ? Form.find(params[:id]) : current_user.forms.find(params[:id])
     end
 
+    # Returns a scoped relation for forms based on the current user's role.
+    def current_user_forms
+      current_user.super_admin? ? Form : current_user.forms
+    end
+
+    # Simple owner authorization to guard direct access (e.g., regenerate_link)
     def authorize_owner!
-      return unless user_signed_in?
-      return if current_user.super_admin?
-      if @form.user_id != current_user.id
-        redirect_to forms_path, alert: 'You are not allowed to access this form.'
+      form = @form || Form.find(params[:id])
+      unless current_user.super_admin? || form.user_id == current_user.id
+        redirect_to forms_path, alert: 'You are not authorized to access that form.'
       end
     end
 

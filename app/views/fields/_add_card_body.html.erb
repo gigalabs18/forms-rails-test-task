@@ -1,0 +1,3 @@
+<div id="addQuestionCardBody" class="card-body">
+  <%= render 'fields/add_form', field: (local_assigns[:field] || Field.new(form: @form)) %>
+</div>

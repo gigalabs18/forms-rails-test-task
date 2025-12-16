@@ -1,0 +1,16 @@
+<%# locals: message:, type: :notice|:alert|:info %>
+<% toast_classes = case (type || :notice).to_sym
+when :notice
+  'bg-green-50 text-green-800 border-green-200'
+when :alert
+  'bg-red-50 text-red-800 border-red-200'
+else
+  'bg-slate-50 text-slate-800 border-slate-200'
+end %>
+<div class="toast-wrapper">
+  <div class="rounded-md border px-3 py-2 shadow <%= toast_classes %>"><%= message %></div>
+  <script>
+    // Auto-remove the toast wrapper after a short delay
+    setTimeout(function(){ var w = document.currentScript && document.currentScript.parentElement; if(w){ w.remove(); } }, 3000);
+  </script>
+  </div>

@@ -2,7 +2,6 @@
 <div class="mb-4">
   <div class="flex items-center gap-3">
     <h1 class="text-2xl font-semibold flex-1"><%= @form.title %></h1>
-    <div class="flex items-center gap-2">
       <%= link_to "Back", forms_path, class: "btn btn-ghost" %>
       <% if current_user&.super_admin? || @form.user_id == current_user&.id %>
         <%= link_to "Edit", edit_form_path(@form), class: "btn btn-secondary" %>
@@ -10,72 +9,174 @@
       <% end %>
     </div>
   </div>
-</div>
+ </div>
 
-<p class="mb-4 text-sm text-slate-600">Created by: <span class="font-medium"><%= @form.user&.email || '—' %></span></p>
+<div data-controller="form-show">
+<!-- Toasts container for ephemeral messages -->
+<div id="flash_toasts" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
-<div class="mb-6 flex flex-wrap gap-2">
-  <div class="flex gap-2">
-    <%= link_to "Add field", new_field_path(form_id: @form.id), class: "btn btn-primary" %>
-  </div>
-  <%= link_to "View submissions", form_submissions_path(@form), class: "btn btn-ghost" %>
-</div>
+<p class="mb-2 text-sm text-slate-600">Created by: <span class="font-medium"><%= @form.user&.email || '—' %></span></p>
 
 <% if @form.public_token.present? %>
-  <div class="mb-6 card max-w-2xl">
+  <div class="mb-6 card max-w-4xl">
     <div class="card-body">
-      <div class="flex items-end gap-2">
+      <div class="flex flex-col md:flex-row md:items-center gap-3">
         <div class="flex-1">
-          <label class="label">Shareable public URL</label>
-          <input class="input" type="text" readonly value="<%= fill_form_url(@form.public_token) %>" id="publicLinkInput">
+          <label class="label">Shareable public URL:</label>
+          <input class="input" type="text" readonly value="<%= fill_form_url(@form.public_token) %>" data-form-show-target="publicLinkInput" id="publicLinkInput">
         </div>
-        <button class="btn btn-secondary" onclick="(function(){const el=document.getElementById('publicLinkInput'); navigator.clipboard.writeText(el.value).then(()=>{const b=this; const orig=b.textContent; b.textContent='Copied'; setTimeout(()=>b.textContent=orig,1200);});}).call(this)">Copy</button>
-        <%= button_to 'Regenerate link', regenerate_link_form_path(@form), method: :post, form: { data: { turbo_confirm: 'Regenerate the public link? Existing link will stop working.' } }, class: 'btn btn-danger' %>
+        <div class="flex flex-wrap md:items-center md:justify-end gap-2 md:gap-3 flex-none">
+         <label class="label">Actions:</label>
+          <%= link_to 'Regenerate link', regenerate_link_form_path(@form), method: :post, data: { turbo_confirm: 'Regenerate the public link? Existing link will stop working.' }, class: 'btn btn-danger shrink-0' %>
+          <button type="button" class="btn btn-secondary shrink-0" data-action="form-show#copyLink" data-form-show-target="copyButton">Copy Link</button>
+          <%= link_to "View submissions", form_submissions_path(@form), class: "btn btn-secondary shrink-0" %>
+        </div>
       </div>
       <p class="mt-2 text-xs text-slate-500">Anyone with this link can fill the form. No login required.</p>
     </div>
   </div>
 <% end %>
 
-<div class="card">
-  <table class="table">
-    <thead class="bg-gray-50">
-      <tr>
-        <th class="th">Label</th>
-        <th class="th">Type</th>
-        <th class="th">Order</th>
-        <th class="th"></th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-200">
-      <% @form.fields.ordered.each do |field| %>
-        <tr id="<%= dom_id(field) %>">
-          <td class="td"><%= field.label %></td>
-          <td class="td"><span class="inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700 border border-slate-200"><%= field.field_type.humanize %></span></td>
-          <td class="td"><%= field.position %></td>
-          <td class="td text-right space-x-2">
-            <%= link_to 'Edit', edit_field_path(field), class: "btn btn-secondary" %>
-            <%= button_to 'Delete', field_path(field), method: :delete, form: { data: { turbo_confirm: 'Are you sure?' } }, class: "btn btn-danger" %>
-          </td>
-        </tr>
-        <% if field.select? && field.options.any? %>
-          <tr class="bg-gray-50">
-            <td class="td" colspan="4">
-              <div class="text-sm text-gray-600">Options</div>
-              <ul class="mt-1 list-disc list-inside text-sm">
-                <% field.options.order(Arel.sql('COALESCE(position, 999999), id')).each do |opt| %>
-                  <li id="<%= dom_id(opt) %>">
-                    <span class="font-medium"><%= opt.label %></span>
-                    <span class="text-gray-500">(<%= opt.value %>)</span>
-                    <%= link_to 'Edit', edit_option_path(opt), class: "ml-2 btn btn-ghost text-xs px-2 py-1" %>
-                    <%= button_to 'Delete', option_path(opt), method: :delete, form: { data: { turbo_confirm: 'Delete this option?' } }, class: "ml-1 btn btn-ghost text-xs px-2 py-1 text-red-600" %>
-                  </li>
-                <% end %>
-              </ul>
-            </td>
-          </tr>
-        <% end %>
-      <% end %>
-    </tbody>
-  </table>
+<div id="fields_table_body">
+  <% @form.fields.ordered.each do |field| %>
+    <%= render 'fields/builder_card', field: field %>
+  <% end %>
 </div>
+<div id="addQuestionCard" class="mb-6 card max-w-4xl hidden" style="display:none;" data-form-show-target="addQuestionCard">
+  <%= render 'fields/add_card_body', field: Field.new(form: @form) %>
+  </div>
+
+<!-- Floating + button to open the add-question form -->
+<div class="fixed bottom-6 right-6 z-10">
+  <button id="fabAddQuestion" type="button" aria-expanded="false" aria-controls="addQuestionCard" title="Add question" class="btn btn-primary shadow-lg flex items-center gap-2" data-action="form-show#toggleAddQuestionCard" data-form-show-target="addQuestionFab"><span class="text-lg leading-none">+</span><span>Add question</span></button>
+</div>
+
+</div>
+
+<script>
+  document.addEventListener('turbo:load', function() {
+    var btn = document.getElementById('fabAddQuestion');
+    var card = document.getElementById('addQuestionCard');
+
+    function getForm(){ return document.getElementById('addQuestionForm'); }
+    function getTypeSel(){ return document.getElementById('newFieldType'); }
+    function getOptsSection(){ return document.getElementById('initialOptionsSection'); }
+    function getRepeater(){ return document.getElementById('initialOptionsRepeater'); }
+
+    function hideCard(){ if(card){ card.classList.add('hidden'); card.style.display='none'; } if(btn){ btn.setAttribute('aria-expanded','false'); } }
+    function showCard(){ if(card){ card.classList.remove('hidden'); card.style.display=''; setTimeout(function(){ var i=document.getElementById('newFieldLabel'); if(i) i.focus(); },50);} if(btn){ btn.setAttribute('aria-expanded','true'); } toggleOptions(); }
+    function toggleOptions(){ var typeSel=getTypeSel(), opts=getOptsSection(); if(!typeSel||!opts) return; if(typeSel.value==='select'){ opts.classList.remove('hidden'); opts.style.display='block'; } else { opts.classList.add('hidden'); opts.style.display='none'; } }
+
+    if(card){ hideCard(); }
+    // Ensure all option edit panels start hidden for a consistent UI
+    function collapseOptionEditors(){
+      try { document.querySelectorAll('.option-edit-panel').forEach(function(p){ p.classList.add('hidden'); p.style.display='none'; }); } catch(e) {}
+    }
+    collapseOptionEditors();
+    if(btn){ btn.addEventListener('click', function(){ var expanded = btn.getAttribute('aria-expanded')==='true'; expanded ? hideCard() : showCard(); }); }
+
+    document.addEventListener('click', function(e){
+      var t = e.target;
+      if(t && t.id === 'closeAddQuestion'){ hideCard(); }
+      // Toggle the inline "Add option" panel in option new_form partials (Stimulus fallback)
+      if(t && t.closest && t.closest('[data-controller="toggle"]')){
+        if(t.matches('[data-toggle-target="toggler"]')){
+          var root = t.closest('[data-controller="toggle"]');
+          var panel = root && root.querySelector('[data-toggle-target="toggleable"]');
+          if(panel){
+            var hidden = panel.classList.contains('hidden') || panel.style.display==='none';
+            if(hidden){ panel.classList.remove('hidden'); panel.style.display=''; }
+            else { panel.classList.add('hidden'); panel.style.display='none'; }
+          }
+          return;
+        }
+      }
+      // Toggle option edit panel via edit icon
+      var editBtn = t.closest && t.closest('.option-edit-toggle');
+      if(editBtn){
+        var id = editBtn.getAttribute('data-option-id');
+        var panel = document.getElementById('edit_option_panel_'+id);
+        // Close other panels first to keep UI consistent
+        document.querySelectorAll('.option-edit-panel').forEach(function(p){ if(p.id !== 'edit_option_panel_'+id){ p.classList.add('hidden'); p.style.display='none'; }});
+        if(panel){
+          var hidden = panel.classList.contains('hidden');
+          if(hidden){ panel.classList.remove('hidden'); panel.style.display=''; }
+          else { panel.classList.add('hidden'); panel.style.display='none'; }
+        }
+        return; // prevent fallthrough
+      }
+      // Add option
+      if(t && (t.matches('[data-action="form-show#addOption"]') || t.classList.contains('add-option'))){
+        var repeater = getRepeater(); if(!repeater) return;
+        e.preventDefault();
+        var idx = repeater.querySelectorAll('.option-row').length;
+        var row = document.createElement('div');
+        row.className='grid grid-cols-5 gap-2 items-end option-row';
+        row.innerHTML = '<div class="col-span-3">\
+            <input name="options['+idx+'][label]" class="input" placeholder="e.g. Option '+(idx+1)+'" />\
+          </div>\
+          <div>\
+            <input name="options['+idx+'][value]" class="input" placeholder="value" />\
+          </div>\
+          <div class="flex gap-2">\
+            <button type="button" class="btn btn-secondary add-option">Add</button>\
+            <button type="button" class="btn btn-ghost remove-option">Remove</button>\
+          </div>';
+        repeater.appendChild(row);
+      }
+      // Remove option
+      if(t && (t.matches('[data-action="form-show#removeOption"]') || t.classList.contains('remove-option'))){
+        var r = getRepeater(); if(!r) return;
+        e.preventDefault();
+        var rowEl = t.closest('.option-row');
+        var rows = r.querySelectorAll('.option-row');
+        if(rowEl && rows.length>1){ rowEl.remove(); }
+      }
+    });
+
+    document.addEventListener('change', function(e){
+      if(e.target && e.target.id === 'newFieldType'){ toggleOptions(); }
+    });
+
+    document.addEventListener('turbo:submit-end', function(e){
+      var form = getForm();
+      if(!form || e.target !== form) return;
+      if(e.detail && e.detail.success){
+        form.reset();
+        hideCard();
+        var container = document.getElementById('fields_table_body');
+        if(container && container.lastElementChild){ container.lastElementChild.scrollIntoView({behavior:'smooth', block:'center'}); }
+        var repeater = getRepeater();
+        if(repeater){
+          repeater.innerHTML = '<div class="grid grid-cols-5 gap-2 items-end option-row">\
+              <div class="col-span-3">\
+                <input name="options[0][label]" class="input" placeholder="e.g. Option 1" />\
+              </div>\
+              <div>\
+                <input name="options[0][value]" class="input" placeholder="value" />\
+              </div>\
+              <div class="flex gap-2">\
+                <button type="button" class="btn btn-secondary add-option">Add</button>\
+                <button type="button" class="btn btn-ghost remove-option" disabled>Remove</button>\
+              </div>\
+            </div>';
+        }
+        toggleOptions();
+      }
+    });
+
+    // Close option edit panel after successful update
+    document.addEventListener('turbo:submit-end', function(e){
+      var formEl = e.target;
+      if(!(formEl && formEl.classList && formEl.classList.contains('option-edit-form'))) return;
+      var id = formEl.getAttribute('data-option-id');
+      if(e.detail && e.detail.success){
+        var panel = document.getElementById('edit_option_panel_'+id);
+        if(panel){ panel.classList.add('hidden'); panel.style.display='none'; }
+      }
+    });
+
+    // Also collapse option editors after any Turbo render so new/updated fragments stay consistent
+    document.addEventListener('turbo:render', function(){ collapseOptionEditors(); });
+  });
+</script>

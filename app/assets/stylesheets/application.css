@@ -8,3 +8,31 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+.input { height: 40px; padding: 10px 10px 10px 10px;}
+.min-w-0, .two-col-row{
+    margin: 10px 0px 10px 0;
+}
+
+/* Ensure all primary action buttons match input height */
+.btn {
+    height: 40px !important;
+    padding-top: 0; /* align exactly with fixed height */
+    padding-bottom: 0;
+    padding-left: 16px;
+    padding-right: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1; /* avoid extra vertical space */
+}
+
+/* Keep Title and Type on the same row with equal widths */
+.two-col-row {
+    display: flex;
+    gap: 12px;
+}
+.two-col-row > * {
+    flex: 1 1 0;
+    min-width: 0;
+}

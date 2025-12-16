@@ -15,8 +15,8 @@ class SubmissionsController < ApplicationController
   def create
     @submission = @form.submissions.new
     responses_hash = if params[:responses].present?
-                        # Permit dynamic response keys (field ids) coming from the public form
-                        params.require(:responses).permit!.to_h
+                        # Permit only the keys that correspond to the IDs of the fields in the current form.
+                        params.require(:responses).permit(@form.fields.pluck(:id).map(&:to_s)).to_h
                       else
                         {}
                       end
@@ -49,7 +49,8 @@ class SubmissionsController < ApplicationController
   private
     def validate_responses(responses_hash)
       errs = []
-      @form.fields.ordered.each do |field|
+      # Eager load options to prevent N+1 queries when validating select fields.
+      @form.fields.includes(:options).ordered.each do |field|
         val = responses_hash[field.id.to_s]
         if field.required
           if val.nil? || val.to_s.strip.empty?
@@ -61,6 +62,9 @@ class SubmissionsController < ApplicationController
         case field.field_type
         when 'number'
           errs << "#{field.label} must be a number" unless numeric_string?(val)
+        when 'select'
+          valid_values = field.options.pluck(:value)
+          errs << "#{field.label} has an invalid selection" unless valid_values.include?(val)
         end
       end
       errs

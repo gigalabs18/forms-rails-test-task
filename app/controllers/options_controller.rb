@@ -27,6 +27,22 @@ class OptionsController < ApplicationController
     respond_to do |format|
       if @option.save
         target_form = @option.field&.form
+        # Turbo: append option inline under its field
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.append(
+              "options_list_for_#{@option.field_id}",
+              partial: "options/item",
+              locals: { opt: @option }
+            ),
+            turbo_stream.replace(
+              "new_option_form_for_#{@option.field_id}",
+              partial: "options/new_form",
+              locals: { field: @option.field, option: Option.new(field: @option.field) }
+            )
+          ]
+        end
+        # HTML fallback
         if target_form
           format.html { redirect_to form_path(target_form), notice: "Option added." }
         else
@@ -34,7 +50,20 @@ class OptionsController < ApplicationController
         end
         format.json { render :show, status: :created, location: @option }
       else
-        format.html { render :new, status: :unprocessable_entity }
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            "new_option_form_for_#{@option.field_id}",
+            partial: "options/new_form",
+            locals: { field: @option.field, option: @option }
+          )
+        end
+        format.html do
+          if @option.field&.form
+            redirect_to form_path(@option.field.form), alert: @option.errors.full_messages.to_sentence
+          else
+            render :new, status: :unprocessable_entity
+          end
+        end
         format.json { render json: @option.errors, status: :unprocessable_entity }
       end
     end
@@ -44,7 +73,21 @@ class OptionsController < ApplicationController
   def update
     respond_to do |format|
       if @option.update(option_params)
-        format.html { redirect_to @option, notice: "Option was successfully updated.", status: :see_other }
+        # Turbo: replace the option item inline
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            @option,
+            partial: "options/item",
+            locals: { opt: @option }
+          )
+        end
+        # HTML fallback
+        target_form = @option.field&.form
+        if target_form
+          format.html { redirect_to form_path(target_form), notice: "Option was successfully updated.", status: :see_other }
+        else
+          format.html { redirect_to @option, notice: "Option was successfully updated.", status: :see_other }
+        end
         format.json { render :show, status: :ok, location: @option }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -77,6 +120,6 @@ class OptionsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def option_params
-      params.require(:option).permit(:field_id, :label, :value, :position)
+      params.require(:option).permit(:field_id, :label, :value)
     end
 end

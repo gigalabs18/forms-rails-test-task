@@ -1,0 +1,48 @@
+<% if field && field.errors.any? %>
+  <div class="mb-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+    <ul class="list-disc pl-5">
+      <% field.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+<%= form_with url: fields_path, method: :post, data: { turbo_stream: true, action: 'turbo:submit-end->form-show#addQuestionFormSubmitEnd' }, html: { id: 'addQuestionForm', data: { form_show_target: 'addQuestionForm' } }, class: "space-y-3" do %>
+  <%= hidden_field_tag 'field[form_id]', (field&.form_id || @form&.id) %>
+  <div class="two-col-row">
+    <div>
+      <%= text_field_tag 'field[label]', (field&.label), class: 'input w-full', placeholder: 'Question title', id: 'newFieldLabel' %>
+    </div>
+    <div>
+      <%= select_tag 'field[field_type]', options_for_select(Field::FIELD_TYPES.map { |t| [t.humanize, t] }, (field&.field_type.presence || 'text')), class: 'input w-full', id: 'newFieldType', data: { form_show_target: 'newFieldType', action: 'change->form-show#updateOptionsVisibility' } %>
+    </div>
+  </div>
+  <div id="initialOptionsSection" class="hidden border-t border-slate-200 pt-3" style="display:none;" data-form-show-target="initialOptionsSection">
+    <label class="label">Initial options</label>
+    <div id="initialOptionsRepeater" class="space-y-2" data-form-show-target="initialOptionsRepeater">
+      <div class="grid grid-cols-5 gap-2 items-end option-row">
+        <div class="col-span-3">
+          <input name="options[0][label]" class="input" placeholder="e.g. Option 1" />
+        </div>
+        <div>
+          <input name="options[0][value]" class="input" placeholder="value" />
+        </div>
+        <div class="flex gap-2">
+          <button type="button" class="btn btn-secondary" data-action="form-show#addOption">Add</button>
+          <button type="button" class="btn btn-ghost" data-action="form-show#removeOption" disabled>Remove</button>
+        </div>
+      </div>
+    </div>
+    <p class="mt-1 text-xs text-slate-500">Leave value blank to auto-generate from label.</p>
+  </div>
+  <div class="flex items-center justify-between pt-2">
+    <div class="flex items-center gap-2">
+      <%= check_box_tag 'field[required]', '1', (field&.required || false), class: 'h-4 w-4' %>
+      <label class="text-sm text-slate-700">Required</label>
+    </div>
+    <div class="flex items-center gap-2">
+      <%= submit_tag 'Create', class: 'btn btn-primary btn-wide' %>
+      <button type="button" id="closeAddQuestion" class="btn btn-secondary btn-wide" data-form-show-target="closeAddQuestionButton" data-action="form-show#toggleAddQuestionCard">Cancel</button>
+    </div>
+  </div>
+<% end %>

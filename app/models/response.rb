@@ -1,5 +1,5 @@
 class Response < ApplicationRecord
   belongs_to :submission
   belongs_to :field
-  validates :value, presence: true, allow_blank: true
+  # Validation for presence is handled by the SubmissionsController based on Field#required
 end

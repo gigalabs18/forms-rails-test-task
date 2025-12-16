@@ -32,84 +32,34 @@
     <div class="mt-2 grid grid-cols-3 gap-2">
       <% Field::FIELD_TYPES.each do |t| %>
         <label class="flex items-center gap-2 rounded border border-slate-300 bg-white px-3 py-2 cursor-pointer">
-          <%= form.radio_button :field_type, t, class: "h-4 w-4" %>
+          <%= form.radio_button :field_type, t, class: "h-4 w-4", data: { action: "change->field-form#updateOptionsVisibility" } %>
           <span class="text-sm"><%= t.humanize %></span>
         </label>
       <% end %>
     </div>
-    <p class="mt-2 text-xs text-slate-500" data-options-toggle-target="hint">For Select fields, define choices below.</p>
+    <p class="mt-2 text-xs text-slate-500" data-field-form-target="optionsHint">For Select fields, define choices below.</p>
   </div>
 
-  <div class="mt-4" data-options-toggle-target="container">
+  <div class="mt-4" data-field-form-target="optionsContainer" data-controller="field-form">
     <label class="label">Options (Select only)</label>
-    <div id="options-repeater" class="space-y-2">
+    <div id="options-repeater" class="space-y-2" data-field-form-target="optionsRepeater">
       <div class="flex items-center gap-2">
         <input type="text" name="options[0][label]" class="input flex-1" placeholder="Label">
         <input type="text" name="options[0][value]" class="input flex-1" placeholder="Value (optional)">
-        <button type="button" class="btn btn-danger btn-sm shrink-0" data-remove-row>
+        <button type="button" class="btn btn-danger btn-sm shrink-0" data-action="field-form#removeOption">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
           Remove
         </button>
       </div>
     </div>
     <div class="mt-2">
-      <button type="button" class="btn btn-secondary btn-sm" id="add-option-row">
+      <button type="button" class="btn btn-secondary btn-sm" data-action="field-form#addOption">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add option
       </button>
     </div>
-    <p class="mt-1 text-xs text-slate-500">Add multiple options using rows. If value is omitted, the downcased label is used. Order of rows sets positions.</p>
+    <p class="mt-1 text-xs text-slate-500">Add multiple options using rows. If value is omitted, the downcased label is used.</p>
   </div>
-
-  <div>
-    <%= form.label :position, class: "label" %>
-    <%= form.number_field :position, class: "input", placeholder: "Optional ordering" %>
-  </div>
-
   <div>
     <%= form.submit(form.object.persisted? ? "Update" : "Create", class: "btn btn-primary") %>
   </div>
-<% end %>
-
-<script>
-  (function(){
-    function update() {
-      const checked = document.querySelector('input[name="field[field_type]"]:checked');
-      const isSelect = checked && checked.value === 'select';
-      const container = document.querySelector('[data-options-toggle-target="container"]');
-      if (container) container.style.display = isSelect ? '' : 'none';
-      const hint = document.querySelector('[data-options-toggle-target="hint"]');
-      if (hint) hint.style.display = isSelect ? '' : 'none';
-    }
-    document.addEventListener('DOMContentLoaded', function(){
-      document.querySelectorAll('input[name="field[field_type]"]').forEach(function(el){
-        el.addEventListener('change', update);
-      });
-      update();
-
-      // Repeater logic
-      var addBtn = document.getElementById('add-option-row');
-      var repeater = document.getElementById('options-repeater');
-      var index = 1;
-      if (addBtn && repeater) {
-        addBtn.addEventListener('click', function(){
-          var row = document.createElement('div');
-          row.className = 'flex items-center gap-2';
-          row.innerHTML = '\n            <input type="text" name="options[' + index + '][label]" class="input flex-1" placeholder="Label">\n            <input type="text" name="options[' + index + '][value]" class="input flex-1" placeholder="Value (optional)">\n            <button type="button" class="btn btn-danger btn-sm shrink-0" data-remove-row>\n              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d=\"M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6\"/><path d=\"M10 11v6\"/><path d=\"M14 11v6\"/><path d=\"M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2\"/></svg> Remove\n            </button>\n          ';
-          repeater.appendChild(row);
-          index += 1;
-        });
-        repeater.addEventListener('click', function(e){
-          if (e.target && e.target.matches('[data-remove-row]')) {
-            var row = e.target.closest('.grid');
-            if (row && repeater.children.length > 1) {
-              row.remove();
-            } else if (row) {
-              row.querySelectorAll('input').forEach(function(i){ i.value = ''; });
-            }
-          }
-        });
-      }
-    });
-  })();
-</script>

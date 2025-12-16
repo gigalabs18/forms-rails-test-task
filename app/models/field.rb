@@ -8,7 +8,7 @@ class Field < ApplicationRecord
   validates :label, presence: true
   validates :field_type, presence: true, inclusion: { in: FIELD_TYPES }
 
-  scope :ordered, -> { order(Arel.sql('COALESCE(position, 999999), id')) }
+  scope :ordered, -> { order(:id) }
 
   def select?
     field_type == 'select'

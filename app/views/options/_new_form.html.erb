@@ -1,0 +1,33 @@
+<div data-controller="toggle">
+  <div class="flex gap-2 mb-2">
+    <button type="button" class="btn btn-primary" data-action="toggle#show" data-toggle-target="toggler">Add option</button>
+  </div>
+  
+  <div data-toggle-target="toggleable" class="<%= (defined?(option) && option&.errors&.any?) ? '' : 'hidden' %>" style="<%= (defined?(option) && option&.errors&.any?) ? '' : 'display:none;' %>">
+    <% if defined?(option) && option&.errors&.any? %>
+      <div class="mb-2 rounded border border-red-200 bg-red-50 text-red-800 px-3 py-2 text-sm">
+        <ul class="list-disc ml-4">
+          <% option.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+    <%= form_with url: options_path, method: :post, data: { turbo_stream: true }, class: "grid grid-cols-1 md:grid-cols-5 gap-2 items-end" do %>
+      <%= hidden_field_tag 'option[field_id]', field.id %>
+      <div>
+        <label class="label">New option label</label>
+        <input name="option[label]" class="input" placeholder="e.g. Option 1" />
+      </div>
+      <div>
+        <label class="label">Value</label>
+        <input name="option[value]" class="input" placeholder="e.g. option-1" />
+      </div>
+      <div class="md:col-span-2 flex gap-2">
+        <button class="btn btn-primary" type="submit">Save</button>
+        <%# This button simply re-renders the partial via the controller, which resets the toggle state %>
+        <%= link_to 'Cancel', field_path(field), class: "btn btn-secondary", data: { turbo_stream: true, "turbo-frame": "new_option_form_for_#{field.id}" } %>
+      </div>
+    <% end %>
+    </div>
+</div>
