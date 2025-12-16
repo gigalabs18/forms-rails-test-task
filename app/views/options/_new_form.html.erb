@@ -13,7 +13,7 @@
         </ul>
       </div>
     <% end %>
-    <%= form_with url: options_path, method: :post, data: { turbo_stream: true }, class: "grid grid-cols-1 md:grid-cols-5 gap-2 items-end" do %>
+    <%= form_with url: options_path, method: :post, data: { turbo_stream: true }, class: "grid grid-cols-1 gap-2 items-end" do %>
       <%= hidden_field_tag 'option[field_id]', field.id %>
       <div>
         <label class="label">New option label</label>
