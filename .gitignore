@@ -36,15 +36,9 @@
 /app/assets/builds/*
 !/app/assets/builds/.keep
 config/credentials/*.key
-config/credentials/*.yml.enc
-config/credentials/test.key
-config/credentials/test.yml.enc
-config/credentials/production.key
-config/credentials/production.yml.enc
-config/credentials/development.key
-config/credentials/development.yml.enc
-config/credentials/staging.key
-config/credentials/staging.yml.enc
+config/credentials/*
 
 config/database.yml
+Gemfile.lock
+.byebug_history
 
