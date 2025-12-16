@@ -39,8 +39,9 @@ class FieldsController < ApplicationController
           # Permit a hash of options where each option has a label and a value.
           # This is more secure than using to_unsafe_h.
           if params[:options].present?
-            permitted_options = params.require(:options).permit!.to_h.values
-            permitted_options.each do |opt|
+            # Permit only expected keys to avoid mass-assignment of arbitrary params
+            permitted = params.permit(options: [:label, :value])[:options]
+            (permitted || {}).values.each do |opt|
               label = opt[:label].to_s.strip
               value = opt[:value].to_s.strip
               next if label.blank?
