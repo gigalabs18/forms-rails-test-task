@@ -80,6 +80,17 @@
     document.addEventListener('click', function(e){
       var t = e.target;
       if(t && t.id === 'closeAddQuestion'){ hideCard(); }
+      // Cancel inside Add option panel: close without navigation
+      if(t && t.classList && t.classList.contains('option-cancel')){
+        e.preventDefault();
+        var root = t.closest && t.closest('[data-controller="toggle"]');
+        var panel = root && root.querySelector('[data-toggle-target="toggleable"]');
+        if(panel){ panel.classList.add('hidden'); panel.style.display='none';
+          // clear inputs inside panel for a clean state next open
+          panel.querySelectorAll('input').forEach(function(i){ try{ i.value=''; }catch(_){} });
+        }
+        return;
+      }
       // Toggle the inline "Add option" panel in option new_form partials (Stimulus fallback)
       if(t && t.closest && t.closest('[data-controller="toggle"]')){
         if(t.matches('[data-toggle-target="toggler"]')){

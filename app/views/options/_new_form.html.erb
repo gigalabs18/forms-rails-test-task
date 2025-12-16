@@ -25,8 +25,7 @@
       </div>
       <div class="md:col-span-2 flex gap-2">
         <button class="btn btn-primary" type="submit">Save</button>
-        <%# This button simply re-renders the partial via the controller, which resets the toggle state %>
-        <%= link_to 'Cancel', field_path(field), class: "btn btn-secondary", data: { turbo_stream: true, "turbo-frame": "new_option_form_for_#{field.id}" } %>
+        <button type="button" class="btn btn-secondary option-cancel">Cancel</button>
       </div>
     <% end %>
     </div>
