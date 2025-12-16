@@ -25,20 +25,6 @@
           <%= f.select :field_type, Field::FIELD_TYPES.map { |t| [t.humanize, t] }, {}, class: 'input w-full', onchange: 'this.form.requestSubmit()' %>
         </div>
       </div>
-
-      <% if field.select? %>
-        <div class="mt-4 border-t border-slate-200 pt-4">
-          <ul id="options_list_for_<%= field.id %>" class="space-y-1">
-            <% field.options.each do |opt| %>
-              <%= render 'options/item', opt: opt %>
-            <% end %>
-          </ul>
-          <div class="mt-3" id="new_option_form_for_<%= field.id %>">
-            <%= render 'options/new_form', field: field, option: Option.new(field: field) %>
-          </div>
-        </div>
-      <% end %>
-
       <div class="flex items-center justify-between pt-2">
         <div class="flex items-center gap-2">
           <%= f.check_box :required, class: 'h-4 w-4' %>
@@ -47,6 +33,19 @@
         <div class="flex items-center gap-2">
           <%= f.submit 'Update', class: 'btn btn-secondary btn-wide' %>
           <%= link_to 'Delete', field_path(field), data: { turbo_method: :delete, turbo_confirm: 'Delete this question?' }, class: 'btn btn-danger btn-wide' %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if field.select? %>
+      <div class="mt-4 border-t border-slate-200 pt-4">
+        <ul id="options_list_for_<%= field.id %>" class="space-y-1">
+          <% field.options.each do |opt| %>
+            <%= render 'options/item', opt: opt %>
+          <% end %>
+        </ul>
+        <div class="mt-3" id="new_option_form_for_<%= field.id %>">
+          <%= render 'options/new_form', field: field, option: Option.new(field: field) %>
         </div>
       </div>
     <% end %>

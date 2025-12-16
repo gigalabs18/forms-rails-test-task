@@ -25,8 +25,8 @@
           <label class="label">Shareable public URL:</label>
           <input class="input" type="text" readonly value="<%= fill_form_url(@form.public_token) %>" data-form-show-target="publicLinkInput" id="publicLinkInput">
         </div>
-        <div class="flex flex-wrap md:items-center md:justify-end gap-2 md:gap-3 flex-none">
-         <label class="label">Actions:</label>
+        <div class="flex-1">
+          <label class="label">Actions:</label>
           <%= link_to 'Regenerate link', regenerate_link_form_path(@form), method: :post, data: { turbo_confirm: 'Regenerate the public link? Existing link will stop working.' }, class: 'btn btn-danger shrink-0' %>
           <button type="button" class="btn btn-secondary shrink-0" data-action="form-show#copyLink" data-form-show-target="copyButton">Copy Link</button>
           <%= link_to "View submissions", form_submissions_path(@form), class: "btn btn-secondary shrink-0" %>
@@ -48,7 +48,7 @@
 
 <!-- Floating + button to open the add-question form -->
 <div class="fixed bottom-6 right-6 z-10">
-  <button id="fabAddQuestion" type="button" aria-expanded="false" aria-controls="addQuestionCard" title="Add question" class="btn btn-primary shadow-lg flex items-center gap-2" data-action="form-show#toggleAddQuestionCard" data-form-show-target="addQuestionFab"><span class="text-lg leading-none">+</span><span>Add question</span></button>
+  <button id="fabAddQuestion" type="button" aria-expanded="false" aria-controls="addQuestionCard" title="Add field" class="btn btn-primary shadow-lg flex items-center gap-2" data-action="form-show#toggleAddQuestionCard" data-form-show-target="addQuestionFab"><span class="text-lg leading-none">+</span><span>Add field</span></button>
 </div>
 
 </div>
@@ -176,7 +176,16 @@
       }
     });
 
-    // Also collapse option editors after any Turbo render so new/updated fragments stay consistent
+    // Also collapse option editors around Turbo Stream renders to keep UI consistent
+    document.addEventListener('turbo:before-stream-render', function(){ collapseOptionEditors(); });
     document.addEventListener('turbo:render', function(){ collapseOptionEditors(); });
+    // Fallback: slight delay collapse to catch any late DOM mutations
+    document.addEventListener('turbo:submit-end', function(e){
+      // When a field card is replaced on update, ensure editors are collapsed afterwards
+      var target = e.target;
+      if(target && target.matches('form[action*="/fields/"][method="post"], form[action*="/fields/"][method="patch"], form[action*="/fields/"][data-turbo-stream="true"]')){
+        setTimeout(collapseOptionEditors, 50);
+      }
+    });
   });
 </script>

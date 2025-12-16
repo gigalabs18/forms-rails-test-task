@@ -14,7 +14,7 @@
     </div>
   </div>
 
-  <div id="edit_option_panel_<%= opt.id %>" data-option-id="<%= opt.id %>" class="mt-3 hidden option-edit-panel">
+  <div id="edit_option_panel_<%= opt.id %>" data-option-id="<%= opt.id %>" class="mt-3 hidden option-edit-panel" style="display:none;">
     <%= form_with model: opt, url: option_path(opt), method: :patch, data: { turbo_stream: true }, html: { class: 'option-edit-form', 'data-option-id': opt.id } do |f| %>
       <div class="grid grid-cols-12 gap-2 items-end">
         <div class="col-span-12 md:col-span-5">
