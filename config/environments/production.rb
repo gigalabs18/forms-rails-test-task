@@ -85,12 +85,9 @@ Rails.application.configure do
   config.hosts << /[a-z0-9-]+\.ngrok\.app/
   config.hosts << /[a-z0-9-]+\.ngrok\.io/
   config.hosts << "165.22.219.99"
-  # Allow CSRF requests from the IP over both http/https to avoid origin mismatch during initial setup.
-  # Prefer setting a real domain with HTTPS and then remove the http origin below.
-  config.action_controller.permitted_csrf_origins = [
-    "https://165.22.219.99",
-    "http://165.22.219.99"
-  ]
+  # For IP-only HTTP access, disable CSRF Origin check to avoid mismatches.
+  # Re-enable when behind HTTPS with a proper domain.
+  config.action_controller.forgery_protection_origin_check = false
   # Optional comma-separated override: RAILS_ALLOWED_HOSTS="foo.com,bar.example"
   if ENV["RAILS_ALLOWED_HOSTS"].present?
     ENV["RAILS_ALLOWED_HOSTS"].split(/,\s*/).each { |h| config.hosts << h }
